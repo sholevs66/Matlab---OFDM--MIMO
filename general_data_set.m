@@ -68,7 +68,7 @@ rxWaveform_noisy = rxWaveform_noisy(1+offset:end,:);
 
 %% demodulate
 Rx_grid = lteOFDMDemodulate(enb,rxwave);
-Rx_grid_noisy = lteOFDMDemodulate(rxWaveform_noisy);
+Rx_grid_noisy = lteOFDMDemodulate(enb,rxWaveform_noisy);
 
 %% channel response
 [H_ideal] = lteDLPerfectChannelEstimate(enb,channel,[offset,0]);        % [RB*12, 14, nRx, nTx]
