@@ -30,8 +30,7 @@ By default we use Matlabs configuration. lines 51-53 replaces the default config
 
 3) Notice again that in the defualt case of 2x2 spatial multiplexing we have that each bin in Rx_grid is a sum of 2 (probably different) symbols transmitted from Tx1 and Tx2 that went through different channels.
 So for example, the following quantity should be low (less than -45db):
+
 e = Rx_grid(:,3,1) - (Tx_grid(:,3,1).*H_ideal(:,3,1,1) + Tx_grid(:,3,2).*H_ideal(:,3,1,2) );
 20*log10(rms(abs(e))/rms(abs(Rx_grid(:,3,1))))
-%%
-sdfopsdmfosd
-%%
+
