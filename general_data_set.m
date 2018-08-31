@@ -20,6 +20,7 @@ tx_pilots_symbol = repmat(lteSymbolModulate([0;0],'QPSK'), [size(Tx_grid, 1), 1]
 tx_pilots_symbol = repmat(tx_pilots_symbol,[1,1,nTx]);
 Tx_grid(:,1,:) = tx_pilots_symbol;                                          % insert pilots
 
+
 % random data - spatial multiplexing: different data on each Tx
 numberOfBits = size(Tx_grid,1)*size(Tx_grid,2)*nTx*2;                       % number of bits required is the number of slots in the txgrid times the number of bits required by constellation (2-QPSK, 4-16QAM, etc)
 tx_data_bits = randi([0 1], numberOfBits, 1);
@@ -34,26 +35,28 @@ Tx_grid(:,2:end,:) = tx_data_symbols(:,1:end-1,:);                          % in
 
 %% channel model parameters
 channel.ModelType = 'GMEDS';                        % The Rayleigh fading is modeled using the Generalized Method of Exact Doppler Spread, defualt and reccomended is GMEDS
-channel.DelayProfile = 'Off';                       % fading type: 'EPA', 'EVA', 'ETU', 'Custom', 'Off'
+channel.DelayProfile = 'EPA';                       % fading type: 'EPA', 'EVA', 'ETU', 'Custom', 'Off'
 channel.DopplerFreq = 0;                            % Maximum Doppler frequency, in Hz.
 channel.MIMOCorrelation = 'Medium';                 % Correlation between UE and eNodeB antennas: 'Low', 'Medium', 'UplinkMedium', 'High', 'Custom'
 channel.NRxAnts = 2;                                % number of Rx antennas
 channel.InitTime = 0;
-channel.InitPhase = 0;                               % channel.InitPhase = 'Random';
-channel.Seed = 1;
+channel.InitPhase = 'Random';                              % channel.InitPhase = 'Random';
+channel.Seed = 0;
 channel.NormalizePathGains = 'On';
 channel.NormalizeTxAnts = 'On';
 channel.SamplingRate = info.SamplingRate;
-channel.NTerms = 16;     
-
+channel.NTerms = 16;
+% channel.MIMOCorrelation = 'Custom'; 
+% channel.TxCorrelationMatrix = [1,0.99;0.99,1];             % nTx, nTx matrix, specifying correlation between tx antennas
+% channel.RxCorrelationMatrix = [1,0.99;0.99,1];               % An NRxAnts-by-NRxAnts complex matrix specifying the correlation between each of the receive antennas.
 
 %% transmit signal 
 [rxwave, channel_info] = lteFadingChannel(channel,[txwave;zeros(7,nTx)]);  
       
-
+        
 %% Noise config
 SNRdB = 22;
-SNR = 10^(SNRdB/20);
+SNR = 10^(SNRdB/20);                                                    % linear SNR
 N0 = 1/(sqrt(2.0*enb.CellRefP*double(info.Nfft))*SNR);                  % noise gain
 noise = N0*complex(randn(size(rxwave)),randn(size(rxwave)));            % noise vector
 % Add noise to the received time domain waveform
