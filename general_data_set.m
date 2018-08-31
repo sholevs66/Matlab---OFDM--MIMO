@@ -4,7 +4,7 @@ clear all;
 
 %% generating a single LTE OFDM frame - QPSK
 
-%% Tx config for single LTE OFDM frame
+%% 1) Tx config for single LTE OFDM frame
 nTx = 2;
 enb.CyclicPrefix = 'Normal';    
 enb.NDLRB = 6;                  % number of resource blocks spanning the available BW, each RB should accomodate 12 subcarriers [6:..]
@@ -15,7 +15,7 @@ antPort = 0;
 Tx_grid = lteDLResourceGrid(enb);   
  
 
-%% data and pilots
+%% 2) data and pilots
 % pilots
 tx_pilots_symbol = repmat(lteSymbolModulate([0;0],'QPSK'), [size(Tx_grid, 1), 1]);
 tx_pilots_symbol = repmat(tx_pilots_symbol,[1,1,nTx]);
@@ -30,11 +30,11 @@ tx_data_symbols = reshape(tx_data_symbols, [size(Tx_grid,1),size(Tx_grid,2),size
 Tx_grid(:,2:end,:) = tx_data_symbols(:,1:end-1,:);                          % insert randomized data symbols
 
 
-%% get time signals
+%% 3) get time signals
 [txwave,info] = lteOFDMModulate(enb,Tx_grid);
 
 
-%% channel model parameters
+%% 4) channel model parameters
 channel.ModelType = 'GMEDS';                        % The Rayleigh fading is modeled using the Generalized Method of Exact Doppler Spread, defualt and reccomended is GMEDS
 channel.DelayProfile = 'EPA';                       % fading type: 'EPA', 'EVA', 'ETU', 'Custom', 'Off'
 channel.DopplerFreq = 0;                            % Maximum Doppler frequency, in Hz.
@@ -52,11 +52,11 @@ channel.NTerms = 16;
 % channel.TxCorrelationMatrix = [1,0.99;0.99,1];             % nTx, nTx matrix, specifying correlation between tx antennas
 % channel.RxCorrelationMatrix = [1,0.99;0.99,1];               % An NRxAnts-by-NRxAnts complex matrix specifying the correlation between each of the receive antennas.
 
-%% transmit signal 
+%% 5) transmit signal 
 [rxwave, channel_info] = lteFadingChannel(channel,[txwave;zeros(7,nTx)]);  
       
         
-%% Noise config
+%% 6) Noise config
 SNRdB = 22;
 SNR = 10^(SNRdB/20);                                                    % linear SNR
 N0 = 1/(sqrt(2.0*enb.CellRefP*double(info.Nfft))*SNR);                  % noise gain
@@ -65,17 +65,17 @@ noise = N0*complex(randn(size(rxwave)),randn(size(rxwave)));            % noise 
 rxWaveform_noisy = rxwave + noise;
 
 
-%% time offset estimate
+%% 7) time offset estimate
 offset = lteDLFrameOffset(enb,rxwave);
 offset = 7;        
 rxwave = rxwave(1+offset:end,:);
 rxWaveform_noisy = rxWaveform_noisy(1+offset:end,:);
 
-%% demodulate the rx signal and the rx+noise signal
+%% 8) demodulate the rx signal and the rx+noise signal
 Rx_grid = lteOFDMDemodulate(enb,rxwave);
 Rx_grid_noisy = lteOFDMDemodulate(enb,rxWaveform_noisy);
 
-%% channel response
+%% 9) channel response
 [H_ideal] = lteDLPerfectChannelEstimate(enb,channel,[offset,0]);        % [RB*12, 14, nRx, nTx]
 
 
