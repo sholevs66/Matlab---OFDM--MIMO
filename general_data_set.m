@@ -1,5 +1,6 @@
 clc;
-%clear all;
+close all;
+clear all;
 
 %% generating a single LTE OFDM frame - QPSK
 
@@ -40,12 +41,13 @@ channel.DopplerFreq = 0;                            % Maximum Doppler frequency,
 channel.MIMOCorrelation = 'Medium';                 % Correlation between UE and eNodeB antennas: 'Low', 'Medium', 'UplinkMedium', 'High', 'Custom'
 channel.NRxAnts = 2;                                % number of Rx antennas
 channel.InitTime = 0;
-channel.InitPhase = 'Random';                              % channel.InitPhase = 'Random';
-channel.Seed = 0;
+channel.InitPhase = 'Random';                       % channel.InitPhase = 'Random';
+channel.Seed = 100;                                   
 channel.NormalizePathGains = 'On';
 channel.NormalizeTxAnts = 'On';
 channel.SamplingRate = info.SamplingRate;
 channel.NTerms = 16;
+
 % channel.MIMOCorrelation = 'Custom'; 
 % channel.TxCorrelationMatrix = [1,0.99;0.99,1];             % nTx, nTx matrix, specifying correlation between tx antennas
 % channel.RxCorrelationMatrix = [1,0.99;0.99,1];               % An NRxAnts-by-NRxAnts complex matrix specifying the correlation between each of the receive antennas.
@@ -69,13 +71,12 @@ offset = 7;
 rxwave = rxwave(1+offset:end,:);
 rxWaveform_noisy = rxWaveform_noisy(1+offset:end,:);
 
-%% demodulate
+%% demodulate the rx signal and the rx+noise signal
 Rx_grid = lteOFDMDemodulate(enb,rxwave);
 Rx_grid_noisy = lteOFDMDemodulate(enb,rxWaveform_noisy);
 
 %% channel response
 [H_ideal] = lteDLPerfectChannelEstimate(enb,channel,[offset,0]);        % [RB*12, 14, nRx, nTx]
-
 
 
 fprintf('done simulation');
